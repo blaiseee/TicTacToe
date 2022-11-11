@@ -80,7 +80,7 @@ class Game extends React.Component {
       );
     });
 
-    if (winner) status = "Winner: " + winner.player + " @ " + winner.line;
+    if (winner) status = "Winners is Player " + winner.player + " @ " + winner.line;
     else if (!current.squares.includes(null)) status = "Draw";
     else status = "Next player: " + (this.state.xIsNext ? "X" : "O");
 

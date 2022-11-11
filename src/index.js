@@ -1,49 +1,50 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+import Board from "./Board";
 
-function Square(props) {
-  return (
-    <button
-      className={"square " + (props.isWinning ? "square--winning" : null)}
-      onClick={props.onClick}
-    >
-      {props.value}
-    </button>
-  );
-}
+// function Square(props) {
+//   return (
+//     <button
+//       className={"square " + (props.isWinning ? "square--winning" : null)}
+//       onClick={props.onClick}
+//     >
+//       {props.value}
+//     </button>
+//   );
+// }
 
-class Board extends React.Component {
-  render() {
-    return <div>{this.renderSquares(0)}</div>;
-  }
+// class Board extends React.Component {
+//   render() {
+//     return <div>{this.renderSquares(0)}</div>;
+//   }
 
-  renderSquare(i) {
-    return (
-      <Square
-        isWinning={this.props.winningSquares.includes(i)}
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    );
-  }
+//   renderSquare(i) {
+//     return (
+//       <Square
+//         isWinning={this.props.winningSquares.includes(i)}
+//         value={this.props.squares[i]}
+//         onClick={() => this.props.onClick(i)}
+//       />
+//     );
+//   }
 
-  renderSquares(i) {
-    let squares = [];
-    for (i; i < this.props.squares.length; i++) {
-      if (i % 3 === 0) {
-        squares.push(
-          <div className="board-row" key={i}>
-            {this.renderSquare(i)}
-            {this.renderSquare(i + 1)}
-            {this.renderSquare(i + 2)}
-          </div>
-        );
-      }
-    }
-    return squares;
-  }
-}
+//   renderSquares(i) {
+//     let squares = [];
+//     for (i; i < this.props.squares.length; i++) {
+//       if (i % 3 === 0) {
+//         squares.push(
+//           <div className="board-row" key={i}>
+//             {this.renderSquare(i)}
+//             {this.renderSquare(i + 1)}
+//             {this.renderSquare(i + 2)}
+//           </div>
+//         );
+//       }
+//     }
+//     return squares;
+//   }
+// }
 
 class Game extends React.Component {
   constructor(props) {
@@ -74,13 +75,13 @@ class Game extends React.Component {
       return (
         <li key={move}>
           <button onClick={() => this.jumpTo(move)}>
-            {move == this.state.stepNumber ? <b>{desc}</b> : desc}
+            {move === this.state.stepNumber ? <b>{desc}</b> : desc}
           </button>
         </li>
       );
     });
 
-    if (winner) status = "Winners is Player " + winner.player + " @ " + winner.line;
+    if (winner) status = "Winner is Player " + winner.player + " @ " + winner.line;
     else if (!current.squares.includes(null)) status = "Draw";
     else status = "Next player: " + (this.state.xIsNext ? "X" : "O");
 
@@ -155,7 +156,7 @@ class Game extends React.Component {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Game />);
 
-function calculateWinner(squares) {
+const calculateWinner = (squares) => {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],

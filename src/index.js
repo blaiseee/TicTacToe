@@ -2,21 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 
-// class Square extends React.Component {
-//   render() {
-//     return (
-//       <button className="square" onClick={() => this.props.onClick()}>
-//         {this.props.value}
-//       </button>
-//     );
-//   }
-// }
-
-let isDraw = false;
-
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
+    <button
+      className={"square " + (props.isWinning ? "square--winning" : null)}
+      onClick={props.onClick}
+    >
       {props.value}
     </button>
   );
@@ -24,11 +15,24 @@ function Square(props) {
 
 class Board extends React.Component {
   render() {
-    const renderSquares = [];
+    return <div>{this.renderSquares(0)}</div>;
+  }
 
-    for (let i = 0; i < this.props.squares.length; i++) {
-      if (i % 3 == 0) {
-        renderSquares.push(
+  renderSquare(i) {
+    return (
+      <Square
+        isWinning={this.props.winningSquares.includes(i)}
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+      />
+    );
+  }
+
+  renderSquares(i) {
+    let squares = [];
+    for (i; i < this.props.squares.length; i++) {
+      if (i % 3 === 0) {
+        squares.push(
           <div className="board-row" key={i}>
             {this.renderSquare(i)}
             {this.renderSquare(i + 1)}
@@ -37,17 +41,7 @@ class Board extends React.Component {
         );
       }
     }
-
-    return <div>{renderSquares}</div>;
-  }
-
-  renderSquare(i) {
-    return (
-      <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    );
+    return squares;
   }
 }
 
@@ -62,6 +56,7 @@ class Game extends React.Component {
       ],
       stepNumber: 0,
       xIsNext: true,
+      isDescending: true,
     };
   }
 
@@ -71,62 +66,57 @@ class Game extends React.Component {
     const winner = calculateWinner(current.squares);
     let status;
 
-    // for (let a = 0; a < current.squares.length; a++) {
-    //   if (isNotNull(current.squares))
-    //     console.log("draw");
-    // }
-    // console.log(isNull(current.squares));
-
     const moves = history.map((step, move) => {
-      const desc = move ? "Go to move #" + move : "Go to game start";
+      const desc = move
+        ? "Go to move #" + move + " @ " + history[move].location
+        : "Go to game start";
+
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button onClick={() => this.jumpTo(move)}>
+            {move == this.state.stepNumber ? <b>{desc}</b> : desc}
+          </button>
         </li>
       );
     });
 
-    // for (let a = 0; a < current.squares.length; a++) {
-    //   if (isNotNull(current.squares)) {
-    //     status = "Draw";
-    //     console.log("draw");
-    //     // return;
-    //   }
-
-    if (!isDraw)
-    {
-      status = winner
-        ? "Winner: " + winner
-        : "Next player: " + (this.state.xIsNext ? "X" : "0");
-    }
-
-    else
-      status = "Draw";
-
-    // if (winner) status = "Winner: " + winner;
-    // else if (!winner)
-    //   status = "Next player: " + (this.state.xIsNext ? "X" : "O");
-    // else if (this.isDraw)
-    //   status = "Draw";
-    // }
+    if (winner) status = "Winner: " + winner.player + " @ " + winner.line;
+    else if (!current.squares.includes(null)) status = "Draw";
+    else status = "Next player: " + (this.state.xIsNext ? "X" : "O");
 
     return (
       <div className="game">
         <div className="game-board">
           <Board
+            winningSquares={winner ? winner.line : []}
             squares={current.squares}
             onClick={(i) => this.handleClick(i)}
           />
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <ol>{this.state.isDescending ? moves : moves.reverse()}</ol>
+          <button onClick={() => this.sortHistory()}>
+            Sort by: {this.state.isDescending ? "Descending" : "Ascending"}
+          </button>
         </div>
       </div>
     );
   }
 
   handleClick(i) {
+    const locations = [
+      [1, 1],
+      [2, 1],
+      [3, 1],
+      [1, 2],
+      [2, 2],
+      [3, 2],
+      [1, 3],
+      [2, 3],
+      [3, 3],
+    ];
+
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
@@ -138,6 +128,7 @@ class Game extends React.Component {
       history: history.concat([
         {
           squares: squares,
+          location: locations[i],
         },
       ]),
       stepNumber: history.length,
@@ -151,11 +142,18 @@ class Game extends React.Component {
       xIsNext: step % 2 === 0,
     });
   }
+
+  sortHistory() {
+    this.setState({
+      isDescending: !this.state.isDescending,
+    });
+  }
 }
 
-function isNotNull(arr) {
-  return arr.every((element) => element !== null);
-}
+// ========================================
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<Game />);
 
 function calculateWinner(squares) {
   const lines = [
@@ -169,33 +167,11 @@ function calculateWinner(squares) {
     [2, 4, 6],
   ];
 
-  // for (let x = 0; x < lines.length; x++) {
-  //   // if (isNotNull(squares)) {
-  //   //   console.log("draw");
-  //   //   this.isDraw = true;
-  //   // }
-  //   const [a, b, c] = lines[x];
-  //   // console.log(squares);
-  //   if (isNotNull(squares))
-  //     console.log("draw");
-  // }
-
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
 
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c])
-      return squares[a];
-
-    else if (isNotNull(squares)) {
-      isDraw = true;
-      return null;
-    }
+      return { player: squares[a], line: [a, b, c] };
   }
-
   return null;
 }
-
-// ========================================
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<Game />);

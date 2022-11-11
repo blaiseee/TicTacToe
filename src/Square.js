@@ -1,7 +1,7 @@
 import React from "react";
 import "./index.css";
 
-const Square = (props) => {
+const SquareComponent = (props) => {
   return (
     <button
       className={"square " + (props.isWinning ? "square--winning" : null)}
@@ -12,4 +12,4 @@ const Square = (props) => {
   );
 };
 
-export default Square;
+export default SquareComponent;
